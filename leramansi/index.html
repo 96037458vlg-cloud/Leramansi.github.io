@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeRamansi — Поэзия и музыка</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f3f0e6;
+            --text: #6b5b45;
+            --text-light: #a89b8c;
+            --accent: #c4a77d;
+            --line: #d4c9b8;
+            --line-active: #b8a994;
+            --overlay: rgba(107, 91, 69, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 24px 48px;
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            transition: background 0.4s, padding 0.4s;
+        }
+
+        header.scrolled {
+            background: rgba(243, 240, 230, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 16px 48px;
+            box-shadow: 0 1px 0 var(--line);
+        }
+
+        header a {
+            font-family: 'Cormorant Infant', serif;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: lowercase;
+            color: #fff;
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        header.scrolled a {
+            color: var(--text);
+        }
+
+        header a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 0;
+            height: 1px;
+            background: var(--accent);
+            transition: width 0.3s, left 0.3s;
+        }
+
+        header a:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: url('/images/lugovie-cvety.webp') center/cover no-repeat;
+        }
+
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: #fff;
+        }
+
+        .hero-content h1 {
+            font-family: 'Cormorant Infant', serif;
+            font-size: clamp(64px, 12vw, 140px);
+            font-weight: 300;
+            letter-spacing: 12px;
+            line-height: 1;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1.2s ease forwards;
+        }
+
+        .hero-content .subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-top: 24px;
+            opacity: 0;
+            animation: fadeUp 1.2s ease 0.4s forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== ABOUT ===== */
+        .about {
+            padding: 120px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .about-text {
+            font-family: 'Cormorant Infant', serif;
+            font-size: clamp(24px, 3vw, 36px);
+            font-weight: 300;
+            line-height: 1.5;
+            color: var(--text);
+        }
+
+        .about-text em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .about-image {
+            position: relative;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+        }
+
+        .about-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(20%) sepia(10%);
+            transition: filter 0.6s, transform 0.6s;
+        }
+
+        .about-image:hover img {
+            filter: grayscale(0%) sepia(0%);
+            transform: scale(1.03);
+        }
+
+        /* ===== PLAYLIST ===== */
+        .playlist-section {
+            padding: 0 48px 120px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-light);
+            margin-bottom: 48px;
+        }
+
+        .track {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 24px;
+            padding: 28px 0;
+            border-bottom: 1px dashed var(--line);
+            cursor: pointer;
+            transition: opacity 0.3s;
+            position: relative;
+        }
+
+        .track:hover {
+            opacity: 0.7;
+        }
+
+        .track-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .track-title {
+            font-family: 'Cormorant Infant', serif;
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 300;
+            line-height: 1.1;
+            color: var(--text);
+            transition: color 0.3s;
+        }
+
+        .track.active .track-title {
+            color: var(--accent);
+        }
+
+        .track-meta {
+            font-size: 12px;
+            color: var(--text-light);
+            letter-spacing: 1px;
+        }
+
+        .track-center {
+            position: relative;
+            width: 120px;
+            height: 80px;
+            flex-shrink: 0;
+        }
+
+        .track-center img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+            filter: grayscale(30%);
+            transition: filter 0.4s;
+        }
+
+        .track:hover .track-center img,
+        .track.active .track-center img {
+            filter: grayscale(0%);
+        }
+
+        .track-play {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(107, 91, 69, 0.3);
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .track:hover .track-play,
+        .track.active .track-play {
+            opacity: 1;
+        }
+
+        .track-play svg {
+            width: 28px;
+            height: 28px;
+            fill: #fff;
+        }
+
+        .track-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 16px;
+        }
+
+        .track-number {
+            font-family: 'Cormorant Infant', serif;
+            font-size: 14px;
+            color: var(--text-light);
+            letter-spacing: 2px;
+        }
+
+        .track-progress {
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            height: 1px;
+            background: var(--text);
+            width: 0%;
+            transition: width 0.1s linear;
+            z-index: 2;
+        }
+
+        /* ===== SONG PAGE ===== */
+        .song-page {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 200;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .song-page.open {
+            transform: translateX(0);
+        }
+
+        .song-page-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 100px 48px 120px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 48px;
+            transition: color 0.3s;
+        }
+
+        .back-btn:hover {
+            color: var(--text);
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .song-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+            margin-bottom: 64px;
+        }
+
+        .song-image {
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .song-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .song-info h2 {
+            font-family: 'Cormorant Infant', serif;
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .song-info .song-number {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: var(--text-light);
+            margin-bottom: 32px;
+        }
+
+        .song-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .song-play-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 1px solid var(--text);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .song-play-btn:hover {
+            background: var(--text);
+        }
+
+        .song-play-btn:hover svg {
+            fill: var(--bg);
+            stroke: var(--bg);
+        }
+
+        .song-play-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text);
+            stroke: var(--text);
+            stroke-width: 0.5;
+            margin-left: 2px;
+        }
+
+        .song-progress-bar {
+            flex: 1;
+            height: 2px;
+            background: var(--line);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .song-progress-fill {
+            height: 100%;
+            background: var(--text);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .song-time {
+            font-size: 12px;
+            color: var(--text-light);
+            font-variant-numeric: tabular-nums;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .lyrics {
+            font-family: 'Cormorant Infant', serif;
+            font-size: clamp(18px, 2.5vw, 26px);
+            font-weight: 300;
+            line-height: 1.8;
+            color: var(--text);
+            white-space: pre-line;
+        }
+
+        /* ===== GLOBAL PLAYER ===== */
+        .global-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(243, 240, 230, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--line);
+            padding: 16px 48px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            z-index: 150;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .global-player.visible {
+            transform: translateY(0);
+        }
+
+        .gp-info {
+            flex: 0 0 200px;
+        }
+
+        .gp-title {
+            font-family: 'Cormorant Infant', serif;
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gp-artist {
+            font-size: 11px;
+            color: var(--text-light);
+            letter-spacing: 1px;
+        }
+
+        .gp-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .gp-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--text);
+            transition: color 0.2s;
+        }
+
+        .gp-btn:hover {
+            color: var(--accent);
+        }
+
+        .gp-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .gp-btn.play svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .gp-progress {
+            flex: 1;
+            height: 2px;
+            background: var(--line);
+            position: relative;
+            cursor: pointer;
+            margin: 0 16px;
+        }
+
+        .gp-progress-fill {
+            height: 100%;
+            background: var(--text);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .gp-time {
+            font-size: 11px;
+            color: var(--text-light);
+            font-variant-numeric: tabular-nums;
+            min-width: 70px;
+            text-align: right;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            header {
+                padding: 16px 24px;
+                gap: 20px;
+            }
+
+            header a {
+                font-size: 12px;
+                letter-spacing: 1px;
+            }
+
+            .about {
+                grid-template-columns: 1fr;
+                padding: 80px 24px;
+                gap: 40px;
+            }
+
+            .playlist-section {
+                padding: 0 24px 80px;
+            }
+
+            .track {
+                grid-template-columns: 1fr auto;
+                gap: 12px;
+            }
+
+            .track-center {
+                display: none;
+            }
+
+            .song-page-inner {
+                padding: 80px 24px 100px;
+            }
+
+            .song-hero {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .global-player {
+                padding: 12px 24px;
+            }
+
+            .gp-info {
+                flex: 0 0 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header id="header">
+        <a href="#hero">поэзия</a>
+        <a href="#about">музыка</a>
+        <a href="#playlist">эмоции</a>
+        <a href="#playlist">впечатления</a>
+        <a href="#author">обо мне</a>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1>LeRamansi</h1>
+            <!-- если нужен подзаголовок – раскомментируйте:
+            <div class="subtitle">Поэзия и музыка</div> -->
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <!-- ПЕРВЫЙ БЛОК: ЦИТАТА + ОБЛОЖКА КНИГИ (текст слева, фото справа) -->
+<section class="about" id="about">
+    <div class="about-text">
+        Здесь стихи обретают мелодии,<br>
+        а паузы между строк<br>
+        наполняются <em>музыкой</em>.
+        <br>
+        <br>
+        Кинцуги — древнее японское искусство <br>
+        скреплять разбитую керамику золотым лаком, <br>
+        делая её ещё <em>красивее</em>.
+    </div>
+    <div class="about-image">
+        <img src="/images/oblogka.webp" alt="Обложка книги">
+    </div>
+</section>
+
+<!-- ВТОРОЙ БЛОК: ОБ АВТОРЕ (фото слева, текст справа) -->
+<section class="about" id="author">
+    <div class="about-image">
+        <img src="/images/leramansi.webp" alt="Лера Манси">
+    </div>
+    <div class="about-text">
+        <h2 style="font-family: 'Cormorant Infant', serif; font-size: 32px; margin-bottom: 20px; color: var(--text);"> Лера Манси</h2>
+        <p style="font-size: 20px; line-height: 1.6; color: var(--text);">
+            Поэт,  нейро-музыкант, создатель проекта «LeRamansi».<br>
+            Здесь я соединяю свои стихи с музыкой,<br>
+            чтобы каждая строка звучала.<br>
+            <br>
+            На этом сайте — 25 стихотворений,<br>
+            каждое из которых обрело мелодию.<br>
+            Слушайте, читайте, чувствуйте.
+        </p>
+    </div>
+</section>
+
+    <!-- PLAYLIST -->
+    <section class="playlist-section" id="playlist">
+        <div class="section-label">Содержание</div>
+        <div id="playlist-container"></div>
+    </section>
+
+    <!-- SONG PAGE -->
+    <div class="song-page" id="songPage">
+        <div class="song-page-inner">
+            <button class="back-btn" onclick="closeSong()">
+                <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Назад к сборнику
+            </button>
+            <div class="song-hero">
+                <div class="song-image">
+                    <img id="songImage" src="" alt="">
+                </div>
+                <div class="song-info">
+                    <div class="song-number" id="songNumber">01</div>
+                    <h2 id="songTitle">Название песни</h2>
+                    <div class="song-controls">
+                        <button class="song-play-btn" id="songPlayBtn" onclick="togglePlay()">
+                            <svg id="songPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <svg id="songPauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <div class="song-progress-bar" id="songProgressBar" onclick="seek(event, this)">
+                            <div class="song-progress-fill" id="songProgressFill"></div>
+                        </div>
+                        <div class="song-time" id="songTime">0:00 / 0:00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="lyrics" id="songLyrics"></div>
+        </div>
+    </div>
+
+    <!-- GLOBAL PLAYER -->
+    <div class="global-player" id="globalPlayer">
+        <div class="gp-info">
+            <div class="gp-title" id="gpTitle">Название</div>
+            <div class="gp-artist">LeRamansi</div>
+        </div>
+        <div class="gp-controls">
+            <button class="gp-btn" onclick="prevSong()">
+                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="gp-btn play" onclick="togglePlay()" id="gpPlayBtn">
+                <svg id="gpPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="gpPauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button class="gp-btn" onclick="nextSong()">
+                <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+        </div>
+        <div class="gp-progress" id="gpProgress" onclick="seek(event, this)">
+            <div class="gp-progress-fill" id="gpProgressFill"></div>
+        </div>
+        <div class="gp-time" id="gpTime">0:00 / 0:00</div>
+    </div>
+
+    <!-- AUDIO -->
+    <audio id="audioPlayer" preload="metadata"></audio>
+
+    <script>
+        // ===== ДАННЫЕ =====
+        const songs = [
+    {
+        id: 1,
+        title: "Такая безусловная любовь",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/takaya_bezuslovnaya_lyubov.wav",
+        image: "/images/takaya_bezuslovnaya_lyubov.webp",
+        duration: "3:00",
+        lyrics: `Такая безусловная любовь.
+Без пустотелых слов, напоминаний.
+Без функций, выполнения дел,
+Не требуя всё больше подтверждений.
+
+Не ежедневных списков, протокола ради,
+Не для отчёта и не в угоду дню ---
+Она не ждёт, когда ты станешь на колени,
+И не вменяет жертву в дань свою.
+
+Она есть --- просто, полно, непреложно,
+Как свет, что льётся, не спросив, кому.
+Не цепь, не ярмо --- хоть очень сложно
+Вплетать любовь в судьбы волос тесьму.
+
+Она не кабала для прозябанья,
+Не долг, не торг, не вечный пересчёт.
+Звонок --- не рапорт, не оправданье,
+А голос тот, что сам собой поёт.
+
+Молчанье --- то не стужа, не измена,
+Доверия выданный мандат.
+Взгляд говорит, скупое слово,
+И искренность --- её же аромат.
+
+Успех любимого --- не плата за хваленье,
+Не отблеск твой, не собственный дворец.
+Прими как дар, без гордого томленья,
+И знай: он сам добыл --- его венец.
+
+Не позабудет даже в полном мраке.
+В тот час, когда судьба согнёт в дугу,
+Он позвонит. Чтоб только ты... И без вопросов,
+Вздохнуть на твёрдом берегу.
+
+Теперь я знаю: быть любимой --- значит
+Не прятать душу в клетку из тоски,
+А быть той заводью, где ветер не растрачен,
+Где у тишины свои ростки.
+
+И отпускать --- не обрывать, но верить,
+Что воздух между нами --- не пустой:
+Он дышит и струится, распахивая двери,
+Парит, и не сжимает мёртвою петлёй.`
+    },
+    {
+        id: 2,
+        title: "Моменты",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/momenty.wav",
+        image: "/images/momenty.webp",
+        duration: "3:00",
+        lyrics: `Как искры бенгальских огней,
+Что мимоза весной роняет,
+Капли света у колодца на дне ---
+Память ласковая знает.
+
+Время --- лава, и нет у неё
+Ни спроса, ни милости к тленному.
+Всё, что руки твои сплели --- сбережёт,
+Всё бренное --- в пепел уложится.
+
+Но не всякий прах будет ветром поднят.
+Лишь немногих моментов всполохи:
+Как встретил её, последний звонок,
+Диплом, и рассвет, что с закатом об руку.
+
+Ты --- начертатель. Ты --- творец.
+В руках --- всё то, что не начато,
+Взмах кистью --- и сам решай: чем полотно
+Дней твоих будет украшено.
+
+Серым бликом пожухлых лугов,
+Вздохом трав, где следы не проложены.
+Иль треском костра, ароматом духов,
+И слогом, ручьём скованным.
+
+Вплетёшь ли ты в вечность их,
+Никто, слышишь, никто! Тебя кроме...,
+Не сотворит, не напишет твой стих,
+Не споёт моментов прожитых.
+
+Каким ты был, не важно там:
+Кредиты, машины, страховка ---
+Что не спасает, от невзгод, неудач ---
+Петля -- сыр в мышеловке.
+
+То ложный щит --- не твой заслон,
+Прогноз о плохой погоде.
+Там встретит мать, соткавшая вуаль
+Из малбери-нитей заботы.
+
+Вот холст, кисть, серый грунт
+Пред тобой он обрёл измерение,
+Дерзость добавь, живи, вдыхай,
+Моменты -- дар, сильнее забвения.`
+    },
+    {
+        id: 3,
+        title: "Слова не ранят",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/slova_ne_ranyt.wav",
+        image: "/images/slova_ne_ranyt.webp",
+        duration: "3:00",
+        lyrics: `Слова не ранят. Это просто дым.
+Прощание с тем, кто стал чужим.
+Вздох полной грудью — сердце не в такт.
+Выдох последний и финальный акт.
+Как тишина после крика, как штиль за волной.
+Я не твоя угроза. Я — твой покой.
+В ладони возьму я памяти вздох —
+В защиту того, что здесь была любовь.
+Ты в светлой футболке, с рисунком в руке —
+Я всё это помню. Оно живёт во мне.
+Дней беззаботных мои корабли
+Скованы льдом у причала тоски. 
+Сияние экрана, холодный декор,
+Тепло и забота — всего лишь курсор,
+Как бегство от жизни, где нет наград,
+Сломает тебя одиночества яд.
+Как тишина после крика, как штиль за волной.
+Ты сам себе угроза. Ты не герой.
+В ладони возьму я памяти вздох —
+Но ты мой сын, и жива моя любовь.`
+    },
+    {
+        id: 4,
+        title: "Китайский ресторан",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/kitayskiy_restoran.wav",
+        image: "/images/kitayskiy_restoran.webp",
+        duration: "3:00",
+        lyrics: `Душа измотана, не тело, ---
+Её порезов сразу не видать.
+Потухший взгляд, опущенные плечи
+Понять способна только мать.
+
+Ты встать не можешь, я --- приехать,
+Не испытать мне твоих мук.
+Привыкла быть всегда стратегом,
+Душевной слабости не признавать.
+
+Ты говоришь: «Нет цели, мама,
+Иссякли силы, исчезли маяки.»
+Я отвечаю --- не жалея:
+«Всё это сказки, лень и пустяки».
+
+На твой намёк: «Я на пределе» ---
+Я слепо следую своей стезе:
+Характер должен быть и сила воли,
+Поможешь только сам себе.
+
+Но если я не знала той завесы,
+Что не даёт дышать и видеть свет,
+Не значит: нет её. Быть может,
+Она --- источник твоих бед.
+
+А если в бездну не смотрела,
+Не говорит о том, что дна ты не познал.
+Кому такое чувство незнакомо,
+Поймёт ли, отчего ты так страдал?
+
+Сидим с тобой в китайском ресторане,
+Свет лампы, аромат лапши.
+Играет музыка, ты бледен кожей,
+Почему не замечала ран твоей души?
+
+Взгляд отвернул --- не потому что стыдно,
+Ты не умеешь взглядом лгать.
+Спрошу о чём-то --- не будет мне обидно,
+Что правду начал ты скрывать.
+
+Мы за столом, всё та же лампа светит,
+Играет музыка, официант спешит.
+Звуки есть, движения, блики,
+Но тишина ужасно давит, будто бы в глуши.`
+    },
+    {
+        id: 5,
+        title: "Совесть",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/sovest.wav",
+        image: "/images/sovest.webp",
+        duration: "3:00",
+        lyrics: `Ты готов повстречаться с ней?
+С той, что заперта в подвале телесном.
+Ты не видишь её, но внутри «амбрэ» ---
+Памяти с ней слишком тесно.
+
+Она холодна, у неё твой взгляд.
+Отдёрнуть плечо --- прикосновения её ужасны.
+Не замарать рукав, в глаза не смотреть,
+Укрыться там, где безопасно.
+
+Вступаешь в грязь, идёшь по головам,
+Пусть промолчит --- ты про неё не вспомнишь.
+Теперь доволен? Гордишься собой?
+Выгнал вон. Чем сердце тогда заполнишь?
+
+Она сводит тебя на нет,
+Её шепот костей слух твой пронзает.
+Сползаешь по стенке, лицом в реализм.
+И лишь этим себя оправдаешь.
+
+Нежданный гость она для всех ---
+Заноза, атавизм --- вокруг другие ориентиры.
+Пугающе строга́ --- в поту холодном ты пред ней,
+Ведь подлости вскрывает она дыры.
+
+Тогда спрошу --- кто уцелеет здесь?
+В том мире, где она замолкнет раньше пульса?
+Останется ли имя у того, кто выжег в себе стыд?
+Если старуха-совесть не проснётся.`
+    },
+    {
+        id: 6,
+        title: "Кто виноват?",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/kto_vinovat.wav",
+        image: "/images/kto_vinovat.webp",
+        duration: "3:00",
+        lyrics: `Кто виноват, что сада нет?
+У розы цвет без аромата.
+Когда всего, чего добилась ты,
+Вдруг стало для других наградой.
+
+Они срывают по чуть-чуть,
+Не видя даже, что украли.
+А ты всё ждёшь --- заметит кто-нибудь,
+Чтобы вернуть себе те месяцы вначале.
+
+И не жалей. И не проси.
+Их благодарность --- поцелуй Иуды.
+Ты им построила мосты ---
+Себе оставив лишь ожидание чуда.
+
+Есть сад. И роза есть --- в пыльце, в огне.
+Но кто-то вынул душу из цветенья.
+Ты победила. Нужен ли тебе трофей на этом дне?
+Нужна ли тебе роза без аромата?`
+    },
+    {
+        id: 7,
+        title: "Мальчик из подвала",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/malchik_iz_podvala.wav",
+        image: "/images/malchik_iz_podvala.webp",
+        duration: "3:00",
+        lyrics: `Смотри, здесь город-сад.
+Дворы, бульвары, парки, дети.
+Здесь технологий красочный парад,
+Огни витрин, неоновые реки.
+
+Но город видишь не таким,
+Прогресс замолк петь гимны счастья.
+Война здесь. Вокруг другой пейзаж.
+Подвал, окно, разбитое запястьем.
+
+Там серых стен руины в ряд ---
+Кварталов городских скелеты.
+И копоть с граффити наперебой
+Затягивают прошлого портреты.
+
+Не тишина, а гул колёс. Весенний гром?
+Нет --- то рокот дальнобойного удара.
+Луч солнца не нашёл пути домой ---
+Сквозь плотный драп и в дырах неба покрывало.
+
+Оно сквозь щель забыло быть голубым,
+Пристанищем для облака неровного овала,
+Заигрывать с ветрами и звёздной книгой быть
+Для местного мальчишки из подвала.
+
+Глаза. Зелёные, как океан,
+С вкраплением морской волны, а в центре --- нэви.
+В них не улыбка --- застыл испуг и страх,
+Детство заперто где-то на задворках.
+
+Был город-сад, в цветах, пыли,
+И тополиный пух летел комками ваты.
+Мальчонка бегал по дворам, шалил,
+Срывал цветы, ловил девчонок милых взгляды.
+
+Не побежит... Скользнёт вдоль стен,
+Пригнувшись, цыпочками по закоулкам.
+Достать воды, бинтов, лекарств
+И притащить в подвал бабулькам.
+
+Привык смотреть на мир сквозь щель,
+Где за стеной летят недели,
+И переждать, когда утихнет вой сирен,
+А шашки с дедом --- только после.
+
+Ты можешь этого не понимать,
+Ведь в городе таком ты не бывала.
+Твой быт --- покрепче кофе по утрам.
+А мальчик?.. Мальчик смотрит из подвала.`
+    },
+    {
+        id: 8,
+        title: "Ветка сирени",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/vetka_sireni.wav",
+        image: "/images/vetka_sireni.webp",
+        duration: "3:00",
+        lyrics: `Снег белой сливы в майском саду,
+Хлопья цветов ароматной вишни,
+Мать на перроне, в первом ряду,
+Держит в руках ветку сирени.
+
+Один вагон, за ним второй:
+Из войны с победой все вышли,
+Но нет того, кто свет в окне,
+Сына взгляд неистово ищет.
+
+Год прошёл, снова май в цвету,
+Всё те же слива и вишня,
+Перрон и поезд, та же мать
+Стоит с веткой сирени.
+
+Нет от сына её вестей,
+Похоронки нет и писем,
+Она каждый год идёт на вокзал,
+Встретить его прибытие.
+
+Прошли года и век другой,
+Как в прошлом в полях окопы.
+Лес изломан, в дыме густом,
+Взрывы рвут горизонты.
+
+В воздухе дрожь, на солнце блеск ---
+Паутины невидимых нитей.
+Оператор у экрана корректирует бой,
+Ланцет срывается в небо.
+
+Вокзал и перрон, победный май,
+Старушки той нет, вся в седине её дочка
+Ждёт возвращения с войны домой
+Своего сына, той матери внука.
+
+Снег белой сливы в майском саду,
+Хлопья цветов розовой вишни.
+Надежда в глазах, боль в груди ---
+Две матери с веткой сирени.`
+    },
+    {
+        id: 9,
+        title: "Два этажа",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/dva_etazha.wav",
+        image: "/images/dva_etazha.webp",
+        duration: "3:00",
+        lyrics: `Мне говорили: «Стены твои высоки» --- нельзя так, твердили.
+Я отвечала, что справлюсь, и мне не впервой --- плавали --- знаем.
+Шла по прямой, зигзагами дней напролёт, что годы делили...
+Стены в два этажа и прошлого нить --- в ковёр уложили.
+
+Два этажа. То вверх, то вниз --- и словно качели,
+Нас закружили в парке судьбы карусели.
+Под осени вальс, что в ярких цветах акварели,
+Мы вспоминаем те два этажа, что нас обогрели.
+
+Два этажа, два пролёта перил череда --- четвёртый и пятый.
+Ступеней откос, посчитала я их лишь вчера. Бетонные плиты.
+Созданный мир наших жизней и событий --- вдали и забытый.
+А поиски странствий и грёз --- уже позади и размыты.`
+    },
+    {
+        id: 10,
+        title: "Метель",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/metel.wav",
+        image: "/images/metel.jpeg",
+        duration: "3:00",
+        lyrics: `Который день метель бушует,
+Скрывая длинные дороги и пути.
+Как шаль с небес лишь образ украшает,
+Покрыв холодный стан земли.
+
+Снег снова в городе закружит.
+От ритма дней его нам не спасти.
+Пушистой пылью, иглами острыми,
+Он соберёт у зимы ассорти.
+
+Не замирай, зимы дыхание,
+Лети до самого окна.
+Ты --- не метель, а заклинание,
+Что пауза нам так нужна.
+
+В этом белом, завьюженном мире
+Не перестанут чудить небеса,
+Мы переждём в своей квартире
+Отсрочку дел, что нам дала пурга.
+
+Плен её кружевного убора
+Замедлит в городе шумный бег.
+Люблю я зимние оковы ---
+От суматошных дел ночлег.`
+    },
+    {
+        id: 11,
+        title: "Давай не будем о том, что будет",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/davay_ne_budem_o_tom_chto_budet.wav",
+        image: "/images/davay_ne_budem_o_tom_chto_budet.webp",
+        duration: "3:00",
+        lyrics: `Давай не будем о том, что будет,
+Ты говоришь -- не верю в стихи.
+Но в них, как в узоре замёрзших стёкол,
+Вся искренность моей души.
+
+Давай забудем о том, что было.
+Пусть снег заметает следы.
+Станет союзником и тихой силой,
+Создаст уголок, где только я и ты.
+
+Метель внесла свои коррективы,
+И наши дела пришлось отложить.
+Транспорт стоит, и сугробов завалы,
+А для нас -- это время вместе побыть.
+
+И если планы метель отменит ---
+Спасибо скажем ей.
+Ведь главный план сегодня ---
+Побыть с тобой у новогодних ёлочных огней.`
+    },
+    {
+        id: 12,
+        title: "Слёз алмазы",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/slyoz_almazy.wav",
+        image: "/images/slyoz_almazy.webp",
+        duration: "3:00",
+        lyrics: `Пусть тебе приснится дождь из моих слёз,
+Как алмазный поток в тумане твоих грёз.
+Не в тоске и печали они рождены,
+А в радости нежной после дней тишины.
+
+Это не гроза, а свет.
+Не прощание --- для встреч амулет.
+Я шлю тебе сквозь время разлуки
+Не плач, а слёз алмазных блики.
+
+Капля росы, что дорожкой скользит
+До улыбки от счастья, по коже ланит.
+Прошли дни ожидания, сияет мой взгляд ---
+Искры сверкают, а не горести град.
+
+И стекая с ресниц, растворяясь, как дым,
+Они --- лишь знак, что ты мною любим.`
+    },
+    {
+        id: 13,
+        title: "Сколько месяцев в году?",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/skolko_mesyatsev_v_godu.wav",
+        image: "/images/skolko_mesyatsev_v_godu.webp",
+        duration: "3:00",
+        lyrics: `Сколько месяцев в году?
+И ты ответишь мне: «Двенадцать».
+Но я умею цифрам лгать,
+Их счёт в душе переиначить.
+
+Один уйдет на хворь, хандру,
+Ещё немного --- на серьёзные болезни.
+На ссоры вычти месяц целиком,
+Обиды, на печаль и на невзгоды.
+
+На зависть отними пару недель,
+Когда жжёт под ребром других успехи.
+А сам пытаешься достать лишь потому,
+Что у кого-то что-то лучше.
+
+Две --- на еду, на сон, на быт,
+На эту клетку, пыль и пробки,
+Гудки, толпу, ненужный свет.
+И минус месяц --- на дороги.
+
+Работа --- съест целых шесть.
+Постой, забыла про налоги,
+Про справки, чаты, мусорный подъезд,
+Про мойки, техосмотр, свои тревоги.
+
+Так сколько месяцев в году?
+Ты сосчитай, но честно, без обмана:
+Так мало месяцев в году,
+На то, чтобы побыть с тобою рядом.
+
+Застынь, песок. И стрелка встань.
+Вода в реке --- замри на полдыхания.
+Верни мне те двенадцать месяцев в году,
+Без списка дел, забот и расставаний.
+
+Где нет календ, нет зимних стуж,
+Ветра не могут разметаться,
+Лишь тишина, где каждое число
+В игольном ушке мироздания.
+
+Их ровно дюжина? Не верь.
+Считай не логикой --- через ощущения,
+Ведь месяц --- это мера взгляда твоего,
+А не Земли нашей вращения.`
+    },
+    {
+        id: 14,
+        title: "Спасибо, родной",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/spasibo_rodnoy.wav",
+        image: "/images/spasibo_rodnoy.webp",
+        duration: "3:00",
+        lyrics: `Благодарю тебя я за надежду,
+Спасительные строки и слова.
+За то, что ты мотив продолжил,
+Когда моя разорвана струна.
+
+Простым звонком, который так нежен,
+Простым словом, что тихо звучит,
+Спасибо, родной, за надежду,
+Спасибо --- мой взгляд говорит.
+
+Ты снова со мной, и не важен
+Исход событий прошлых дней.
+Ты сделал всё, что было возможно,
+Прошёл наш путь сквозь шквал огней.
+
+Пусть ливень льёт, град рушит стены,
+В надежде силы сохраню.
+Я буду ждать, но должен ты вернуться,
+Такой контракт с тобой я подпишу.`
+    },
+    {
+        id: 15,
+        title: "Медикам",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/medikam.wav",
+        image: "/images/medikam.webp",
+        duration: "3:00",
+        lyrics: `Уставший взгляд, бессонная ночь,
+След на лице медицинской маски.
+Обход, приём --- и снова в строю
+Под свет операционной лампы.
+
+Тонко-тонко, шов за швом ---
+Рисует рука хирурга.
+Капля за каплей, до мелочей ---
+В ритм сердца и в такт пульса.
+
+Не ждать наград и похвалы,
+Лишь в третий воскресный день июня.
+Такая профессия --- себя отдавать
+Ради спасения жизней и здоровья.
+
+Палата в белом, серебристый блеск,
+Ручей в силиконе струится.
+Витает в воздухе аромат врачей ---
+Аккорд амбры и тяжёлого спирта.
+
+Кто-то утро встретит дома в тепле,
+Кто-то кофе нальёт в кабинете.
+А им солнца луч постучит в окно
+В ординаторской на рассвете...
+
+Тонко-тонко... последний шов...
+Не дрогнет рука хирурга.
+Капля за каплей --- и хватит сил.
+На страже. С самоотдачей. Спасибо.`
+    },
+    {
+        id: 16,
+        title: "Крупица",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/krupitsa.wav",
+        image: "/images/krupitsa.webp",
+        duration: "3:00",
+        lyrics: `Я соберу себя, упав в овраги,
+На дне крупицы, слов пунктир,
+Расставлю новые я флаги
+Там, где ты не мой кумир.
+
+Узор рубцов --- отмечен срок на коже,
+Разложит карту мест на ней.
+Я выстелю тропу, молчанием во вздохе,
+Для новых станций без камней.
+
+Всё --- что капля в море, что искра в огне,
+Звезда, как далекая точка, как нить в узле.
+Что в айсберге льдинка, песчинка в земле,
+Так мало во многом, но град на холме.
+
+И будет мир и будет время,
+Когда все вместе, просто как семья.
+Мы сядем у костра, где дышит пламя,
+И взмахи крыльев майского жука.`
+    },
+    {
+        id: 17,
+        title: "Билетов нет",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/biletov_net.wav",
+        image: "/images/biletov_net.webp",
+        duration: "3:00",
+        lyrics: `Пройду пешком я сквозь тайгу,
+Тропой в густой чаще.
+Взберусь на гору и спущусь
+На голос твой звучащий.
+
+Парус раскрою, якорь сорву,
+И пусть меня качает.
+Не страшен вихрь и ураган ---
+К тебе я возвращаюсь.
+
+Остановлюсь я на ночлег
+В густой холодной роще.
+И зверь, что наблюдал за мной,
+Уступит моей мощи.
+
+В пустыне я пройду бархан,
+Один, другой, песков бескрайних.
+Испью воды, найду я сил
+Для странствий моих дальних.
+
+Под силу мне любой занос,
+Хоть шквал, хоть мгла и океан штормящий,
+Но не под силу лишь одно ---
+Билетов нет на поезд уходящий.`
+    },
+    {
+        id: 18,
+        title: "Бригантина",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/brigantina.wav",
+        image: "/images/brigantina.webp",
+        duration: "3:00",
+        lyrics: `Штормящее море парусов не жалеет ---
+Волна разобьет их о скалы.
+А ива, что гнётся, переждёт ураган,
+Чтоб снова тянуться к началу.
+
+Так море сломает тех, кто твёрд.
+Кто упрямо погибель ищет!
+А гибких -- будет качать, как колыбель.
+Покуда буря не стихнет.
+
+И только сейчас, когда берег её ---
+Лишь точка в тумане и брызги.
+Я за штурвалом бригантины своей
+Плыву на попутном дыхании.
+
+И нет здесь победы. Есть только цена.
+И выбор: что ты положишь на чашу ---
+Ты можешь остаться одна на скале
+Иль станешь счастливой со всеми.`
+    },
+    {
+        id: 19,
+        title: "Дочь природы и огня",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/doch_prirody_i_ognya.wav",
+        image: "/images/doch_prirody_i_ognya.webp",
+        duration: "3:00",
+        lyrics: `Дочь природы и огня,
+Моя судьба --- стихия!
+И вечный спор, то тихий свет,
+То шума аритмия.
+
+В борьбе за правду двух начал ---
+Мой ритм и терапия.
+Историй жизни полная тетрадь
+Записок к высшей силе.
+
+Как счастья винограда гроздь,
+Подсолнуха семян печали.
+Хочу достойно путь пройти,
+Колени не сгибая,
+Маршрут от станции «не лги»
+До остановки «всех прощаю».
+
+Дочь природы и огня,
+Моя судьба --- стихия!
+Сегодня я костром горю,
+А завтра пеплом остываю.
+
+Во мне река надежд течёт,
+И все её изгибы
+Поток событий создаёт,
+Переходя в долины.`
+    },
+    {
+        id: 20,
+        title: "Женщина-оркестр",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/zhenschina_orkestr.wav",
+        image: "/images/zhenschina_orkestr.webp",
+        duration: "3:00",
+        lyrics: `Я спешу, потому что страшно
+От того, что могу не успеть
+И дни пролетят понапрасну
+Сердца не смогу я зажечь.
+
+Играю на всех инструментах:
+То в такт, то мимо, и не в регистр,
+Не дирижёр я -- импровизатор
+Я просто женщина-оркестр!
+
+Звучали детские частушки,
+В молодость --- романсы под луной.
+Звучали трубы на похоронном марше,
+Когда прощалась я с юности порой.
+
+А после Мендельсон летел над крышей ---
+Я верила: у нас всё впереди.
+Оркестр играл, но всё тише, тише,
+Пока любовь искала выхода в груди.
+
+Гремели медные фанфары ---
+Карьера, крепость и мой дом.
+Но в эти победительные чары
+Вплетался от ударов судьбы мой стон.
+
+Я спешу, потому что страшно,
+От того, что могу не успеть.
+Сыграть еще мелодий жизни страстной,
+Я просто женщина-оркестр.`
+    },
+    {
+        id: 21,
+        title: "Лист желаний",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/list_zhelaniy.wav",
+        image: "/images/list_zhelaniy.webp",
+        duration: "3:00",
+        lyrics: `Лист желаний --- не витрина,
+Не список брендов, цен на них.
+Рассветы, горы и дороги,
+В глазах озёр, в глубинах морских,
+Цвета полей и небосклонов,
+Вершин, что взяты напролом!
+Впишу я пункты будущего плана
+В страницы книжек записных.
+
+Составлю лист желаний,
+Там будет наш Байкал,
+Камчатка, сопка Ключевая,
+Источников горячие ключи.
+Я запишу в него горы Алтая,
+Урала идолов столпы.
+Дороги от края до края ---
+Мои надежды и мечты.
+
+Из офиса с чашечкой кофе
+Я выйду в московский угар
+И в шуме машин услышу
+Далёких ветров репертуар.
+Земель хора пение
+И струн водопадов ручьи,
+Не метро, а волны прибоя ---
+От сердца моего ключи.`
+    },
+    {
+        id: 22,
+        title: "Сказал в декабре",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/skazal_v_dekabre.wav",
+        image: "/images/skazal_v_dekabre.webp",
+        duration: "3:00",
+        lyrics: `Молчит телефон ---
+Не жду я звонка.
+Чат тоже затих---
+Там пелена.
+Память свербит
+От брошенных слов:
+«Тебе я не рад,
+Прощать не готов».
+
+Тебе я не рад ---
+Ты сказал в декабре.
+Весна не спасла,
+Надежды уж нет.
+Я оглянусь ---
+Обозналась, не он.
+А в голове слов обидных тех звон.
+
+Я тоже молчу,
+Не хочу вспоминать.
+Но все же пытаюсь
+Тебя оправдать.
+Из нас двоих
+Прощаю лишь я,
+Но шрамы остались
+От потерь декабря.
+
+Дорога в камнях.
+Твой путь не со мной.
+Ну что ж, я смирилась
+Со злодейкой судьбой.
+Остыла душа,
+Не жжёт, не язвит.
+Мы оба решили ---
+Прости, прости.`
+    },
+    {
+        id: 23,
+        title: "Пастораль",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/pastoral.wav",
+        image: "/images/pastoral.webp",
+        duration: "3:00",
+        lyrics: `Ты звал меня ласково -- солнышком,
+Как кость поперёк. Звучало скрежетом.
+Капли дождя хотел в кубок собрать,
+Я же думала: где бы занять.
+
+Ты приглашал пить росу с лепестка,
+Я думала вслух -- что за тоска.
+Для тебя пахло утром и свежестью,
+Нет, лишь приторной нежностью.
+
+Хотел лугами укутать, прижаться к стогам,
+А я платила по нашим счетам.
+Твой голос --- песок на моих губах
+Мешал мне карьеры писать роман.
+
+В пятнах от кофе, в чернилах тетрадь.
+Хочу я в начало её пролистать.
+Обернулась. Ищу: где пастораль твоя?
+А в ответ тишина, свиристель пела зря.
+
+Назови меня вновь своим солнышком,
+Россыпью, бисером, пёрышком,
+Но воздух не дрогнет, стоит стена.
+Ты нервно бросишь: занят, побудь одна.
+
+Побуду теперь и в этой жажде вдвойне
+Мне слышен отказ - каждый шаг извне.
+Между нами нет слов -- обиды нет.
+Лишь пустота - узор льда на окне.
+
+Назови меня вновь своим солнышком,
+Россыпью, бисером, пёрышком,
+Но март не растопит, в том тепле
+Он слишком устал гореть обо мне.`
+    },
+    {
+        id: 24,
+        title: "Что станет со мной?",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/chto_stanet_so_mnoy.wav",
+        image: "/images/chto_stanet_so_mnoy.webp",
+        duration: "3:00",
+        lyrics: `Что станет со мной?
+Тень на липком песке, морская волна без пены.
+Что станет со мной?
+Волка вой --- не тоска, истошная брань
+На луны серебристой измены.
+Что станет со мной....
+Как тот ручей по венам гор
+Кубарем, яростно и громогласно,
+Юбки-перины угрюмых вершин
+Облаками обнимут напрасно.
+Что станет со мной? После тебя ---
+Сгину в аскезе скалистой.
+Доживу ль до ста лет без того,
+Как ты держишь меня рукой бархатистой?
+Мхом прорасту, покрою гранит ---
+Стану глиной серой, истёртой.
+А за мной останется только стих,
+Одинокий, безродный, мёртвый.
+Что станет со мной?
+Что станет со мной?
+Уйду за тобой я следом.`
+    },
+    {
+        id: 25,
+        title: "Время лечить",
+        file: "https://gitverse.ru/api/repos/LeRamansi/LeRamansi/raw/branch/master/vremya_lechit.wav",
+        image: "/images/vremya_lechit.webp",
+        duration: "3:00",
+        lyrics: `Наряд мой --- жестокость,
+Яд -- мой скелет,
+Резко, по сердцу, удар за ударом
+Для мира пишу я рецепт.
+Это --- не боль.
+Это --- лишь слово.
+Моя тишина
+Вонзается в плоть.
+Время лечить.
+И время накала.
+Врач отступает ---
+Чтоб воин мог жить.
+Снаряд мой --- надменность.
+Приняв этот цвет,
+Орудия залп, отказ за отказом,
+Взорвёт твой рассвет.
+Твой путь -- это хаос.
+Повержена мощь.
+Ресурсы в борьбе, как сталь закаляясь,
+Найдёшь лишь в себе.`
+    }
+];
+
+        // ===== СОСТОЯНИЕ =====
+        let currentIndex = -1;
+        let isPlaying = false;
+        const audio = document.getElementById('audioPlayer');
+
+        // ===== РЕНДЕР ПЛЕЙЛИСТА =====
+        const playlistContainer = document.getElementById('playlist-container');
+
+        function renderPlaylist() {
+            playlistContainer.innerHTML = songs.map((song, index) => `
+                <div class="track ${currentIndex === index ? 'active' : ''}" onclick="openSong(${index})">
+                    <div class="track-left">
+                        <div class="track-title">${song.title}</div>
+                        <div class="track-meta">${song.duration}</div>
+                    </div>
+                    <div class="track-center">
+                       <img src="${song.image}" alt="${song.title}" loading="lazy" onerror="this.style.display='none'">
+                        <div class="track-play" onclick="event.stopPropagation(); playTrack(${index})">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    <div class="track-right">
+                        <div class="track-number">${String(index + 1).padStart(2, '0')}</div>
+                    </div>
+                    <div class="track-progress" id="progress-${index}"></div>
+                </div>
+            `).join('');
+        }
+
+        renderPlaylist();
+
+        // ===== УПРАВЛЕНИЕ ВОСПРОИЗВЕДЕНИЕМ =====
+        function playTrack(index) {
+            if (index === currentIndex && isPlaying) {
+                pause();
+                return;
+            }
+            if (index === currentIndex && !isPlaying) {
+                play();
+                return;
+            }
+
+            currentIndex = index;
+            audio.src = songs[index].file;
+            audio.load();
+
+            audio.oncanplay = () => {
+                play();
+                updateUI();
+                showGlobalPlayer();
+            };
+
+            audio.onerror = () => {
+                console.warn('Не удалось загрузить аудио:', songs[index].file);
+            };
+        }
+
+        function play() {
+            audio.play().then(() => {
+                isPlaying = true;
+                updatePlayButtons();
+            }).catch(e => console.log(e));
+        }
+
+        function pause() {
+            audio.pause();
+            isPlaying = false;
+            updatePlayButtons();
+        }
+
+        function togglePlay() {
+            if (currentIndex === -1) {
+                playTrack(0);
+                return;
+            }
+            if (isPlaying) pause();
+            else play();
+        }
+
+        function nextSong() {
+            let next = currentIndex + 1;
+            if (next >= songs.length) next = 0;
+            playTrack(next);
+        }
+
+        function prevSong() {
+            let prev = currentIndex - 1;
+            if (prev < 0) prev = songs.length - 1;
+            playTrack(prev);
+        }
+
+        // ===== ОБНОВЛЕНИЕ UI =====
+        function updatePlayButtons() {
+            const playIcon = document.getElementById('songPlayIcon');
+            const pauseIcon = document.getElementById('songPauseIcon');
+            const gpPlayIcon = document.getElementById('gpPlayIcon');
+            const gpPauseIcon = document.getElementById('gpPauseIcon');
+
+            if (isPlaying) {
+                if (playIcon) playIcon.style.display = 'none';
+                if (pauseIcon) pauseIcon.style.display = 'block';
+                if (gpPlayIcon) gpPlayIcon.style.display = 'none';
+                if (gpPauseIcon) gpPauseIcon.style.display = 'block';
+            } else {
+                if (playIcon) playIcon.style.display = 'block';
+                if (pauseIcon) pauseIcon.style.display = 'none';
+                if (gpPlayIcon) gpPlayIcon.style.display = 'block';
+                if (gpPauseIcon) gpPauseIcon.style.display = 'none';
+            }
+
+            renderPlaylist();
+        }
+
+        function updateUI() {
+            if (currentIndex === -1) return;
+            const song = songs[currentIndex];
+            document.getElementById('gpTitle').textContent = song.title;
+            document.getElementById('songTitle').textContent = song.title;
+            document.getElementById('songNumber').textContent = String(currentIndex + 1).padStart(2, '0');
+            document.getElementById('songImage').src = song.image;
+            document.getElementById('songLyrics').textContent = song.lyrics;
+        }
+
+        function showGlobalPlayer() {
+            document.getElementById('globalPlayer').classList.add('visible');
+        }
+
+        // ===== ПРОГРЕСС =====
+        function formatTime(sec) {
+            if (isNaN(sec)) return '0:00';
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        audio.ontimeupdate = () => {
+            if (!audio.duration) return;
+            const pct = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('gpProgressFill').style.width = pct + '%';
+            document.getElementById('songProgressFill').style.width = pct + '%';
+
+            const timeStr = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+            document.getElementById('gpTime').textContent = timeStr;
+            document.getElementById('songTime').textContent = timeStr;
+
+            if (currentIndex !== -1) {
+                const trackProgress = document.getElementById(`progress-${currentIndex}`);
+                if (trackProgress) trackProgress.style.width = pct + '%';
+            }
+        };
+
+        audio.onended = () => {
+            nextSong();
+        };
+
+        function seek(event, element) {
+            if (!audio.duration) return;
+            const rect = element.getBoundingClientRect();
+            const pct = (event.clientX - rect.left) / rect.width;
+            audio.currentTime = pct * audio.duration;
+        }
+
+        // ===== СТРАНИЦА ПЕСНИ =====
+        function openSong(index) {
+            currentIndex = index;
+            updateUI();
+            document.getElementById('songPage').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSong() {
+            document.getElementById('songPage').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // ===== HEADER SCROLL =====
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+
+        // ===== КЛАВИШИ =====
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                togglePlay();
+            }
+            if (e.code === 'ArrowRight') nextSong();
+            if (e.code === 'ArrowLeft') prevSong();
+            if (e.code === 'Escape') closeSong();
+        });
+    </script>
+</body>
+</html>
