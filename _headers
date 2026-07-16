@@ -1,0 +1,11 @@
+/images/*.webp
+  Content-Type: image/webp
+  Cache-Control: public, max-age=86400
+
+/images/*.jpg
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=86400
+
+/images/*.jpeg
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=86400
