@@ -736,7 +736,7 @@
     </div>
 
     <!-- AUDIO -->
-    <audio id="audioPlayer" preload="metadata"></audio>
+    <audio id="audioPlayer" preload="metadata" playsinline></audio>
 
     <script>
         // ===== ДАННЫЕ =====
@@ -1668,6 +1668,7 @@
 
             currentIndex = index;
             audio.src = songs[index].file;
+            audio.load();
             updateUI();
             showGlobalPlayer();
             // ВАЖНО для мобильных: play() вызываем сразу, в контексте клика.
