@@ -736,7 +736,8 @@
     </div>
 
     <!-- AUDIO -->
-   <audio id="audioPlayer" preload="metadata" playsinline></audio>
+    <audio id="audioPlayer" preload="metadata"></audio>
+
     <script>
         // ===== ДАННЫЕ =====
         const songs = [
@@ -1655,27 +1656,28 @@
         renderPlaylist();
 
         // ===== УПРАВЛЕНИЕ ВОСПРОИЗВЕДЕНИЕМ =====
-     function playTrack(index) {
-    if (index === currentIndex && isPlaying) {
-        pause();
-        return;
-    }
-    if (index === currentIndex && !isPlaying) {
-        play();
-        return;
-    }
+        function playTrack(index) {
+            if (index === currentIndex && isPlaying) {
+                pause();
+                return;
+            }
+            if (index === currentIndex && !isPlaying) {
+                play();
+                return;
+            }
 
-    currentIndex = index;
-    audio.src = songs[index].file;
-    audio.load(); // явно просим браузер начать загрузку — полезно для мобильных
-    updateUI();
-    showGlobalPlayer();
-    play(); // используем существующую функцию play()
+            currentIndex = index;
+            audio.src = songs[index].file;
+            updateUI();
+            showGlobalPlayer();
+            // ВАЖНО для мобильных: play() вызываем сразу, в контексте клика.
+            // Браузер сам дождётся буферизации и начнёт воспроизведение.
+            play();
 
-    audio.onerror = () => {
-        console.warn('Не удалось загрузить аудио:', songs[index].file);
-    };
-}
+            audio.onerror = () => {
+                console.warn('Не удалось загрузить аудио:', songs[index].file);
+            };
+        }
 
         function play() {
             const promise = audio.play();
