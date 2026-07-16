@@ -736,8 +736,7 @@
     </div>
 
     <!-- AUDIO -->
-    <audio id="audioPlayer" preload="metadata" playsinline crossorigin="anonymous"></audio>
-
+   <audio id="audioPlayer" preload="metadata" playsinline></audio>
     <script>
         // ===== ДАННЫЕ =====
         const songs = [
@@ -1667,46 +1666,14 @@
     }
 
     currentIndex = index;
-    const song = songs[index];
-    
-    // Отключаем старые обработчики, чтобы избежать дублирования
-    audio.oncanplaythrough = null;
-    audio.onerror = null;
-
-    audio.src = song.file;
-    audio.load(); // !!! Явно инициируем загрузку на мобильных
-
+    audio.src = songs[index].file;
+    audio.load(); // явно просим браузер начать загрузку — полезно для мобильных
     updateUI();
     showGlobalPlayer();
+    play(); // используем существующую функцию play()
 
-    // Пытаемся воспроизвести сразу, но если не получается — ждём загрузки
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise
-            .then(() => {
-                isPlaying = true;
-                updatePlayButtons();
-            })
-            .catch(() => {
-                // Если play() заблокирован (например, данные ещё не загружены),
-                // дожидаемся события canplaythrough и пробуем снова
-                audio.oncanplaythrough = function() {
-                    audio.play()
-                        .then(() => {
-                            isPlaying = true;
-                            updatePlayButtons();
-                        })
-                        .catch(e => console.warn('Вторая попытка не удалась:', e));
-                    audio.oncanplaythrough = null;
-                };
-            });
-    }
-
-    // Логируем ошибки загрузки
-    audio.onerror = function(e) {
-        console.error('Ошибка загрузки аудио:', e);
-        // Можно показать пользователю сообщение (но это опционально)
-        // alert('Не удалось загрузить трек. Проверьте интернет-соединение.');
+    audio.onerror = () => {
+        console.warn('Не удалось загрузить аудио:', songs[index].file);
     };
 }
 
