@@ -1623,252 +1623,241 @@
 Найдёшь лишь в себе.`
     }
 ];
-// ===== ПРЕДЗАГРУЗКА АУДИО В ПАМЯТЬ (для мобильных) =====
-const audioCache = {};
+let currentIndex = -1;
+let isPlaying = false;
+let audioUnlocked = false;
 
-async function preloadAllAudio() {
-    // Загружаем все треки параллельно
-    const promises = songs.map(async (song) => {
-        try {
-            const response = await fetch(song.file);
-            if (!response.ok) throw new Error('Network error');
-            const blob = await response.blob();
-            audioCache[song.id] = URL.createObjectURL(blob);
-        } catch (e) {
-            console.warn('Не удалось предзагрузить:', song.file, e);
-        }
-    });
-    await Promise.all(promises);
-    console.log('✅ Все аудиофайлы предзагружены!');
+const audio = document.getElementById('audioPlayer');
+const playlistContainer = document.getElementById('playlist-container');
+
+function renderPlaylist() {
+  playlistContainer.innerHTML = songs.map((song, index) => `
+    <div class="track ${currentIndex === index ? 'active' : ''}" onclick="openSong(${index})">
+      <div class="track-left">
+        <div class="track-title">${song.title}</div>
+        <div class="track-meta">${song.duration}</div>
+      </div>
+      <div>
+        <div class="track-center">
+          <img src="${song.image}" alt="${song.title}" loading="lazy" onerror="this.style.display='none'">
+          <div class="track-play" onclick="event.stopPropagation(); playTrack(${index})">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="track-right">
+        <div class="track-number">${String(index + 1).padStart(2, '0')}</div>
+        <div class="track-progress" id="progress-${index}"></div>
+      </div>
+    </div>
+  `).join('');
 }
 
-// Запускаем предзагрузку после загрузки страницы
-window.addEventListener('load', preloadAllAudio);
-        // ===== СОСТОЯНИЕ =====
-        let currentIndex = -1;
-        let isPlaying = false;
-        const audio = document.getElementById('audioPlayer');
+function updatePlayButtons() {
+  const playIcon = document.getElementById('songPlayIcon');
+  const pauseIcon = document.getElementById('songPauseIcon');
+  const gpPlayIcon = document.getElementById('gpPlayIcon');
+  const gpPauseIcon = document.getElementById('gpPauseIcon');
 
-        // ===== РЕНДЕР ПЛЕЙЛИСТА =====
-        const playlistContainer = document.getElementById('playlist-container');
+  if (isPlaying) {
+    if (playIcon) playIcon.style.display = 'none';
+    if (pauseIcon) pauseIcon.style.display = 'block';
+    if (gpPlayIcon) gpPlayIcon.style.display = 'none';
+    if (gpPauseIcon) gpPauseIcon.style.display = 'block';
+  } else {
+    if (playIcon) playIcon.style.display = 'block';
+    if (pauseIcon) pauseIcon.style.display = 'none';
+    if (gpPlayIcon) gpPlayIcon.style.display = 'block';
+    if (gpPauseIcon) gpPauseIcon.style.display = 'none';
+  }
+}
 
-        function renderPlaylist() {
-            playlistContainer.innerHTML = songs.map((song, index) => `
-                <div class="track ${currentIndex === index ? 'active' : ''}" onclick="openSong(${index})">
-                    <div class="track-left">
-                        <div class="track-title">${song.title}</div>
-                        <div class="track-meta">${song.duration}</div>
-                    </div>
-                    <div class="track-center">
-                       <img src="${song.image}" alt="${song.title}" loading="lazy" onerror="this.style.display='none'">
-                        <div class="track-play" onclick="event.stopPropagation(); playTrack(${index})">
-                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        </div>
-                    </div>
-                    <div class="track-right">
-                        <div class="track-number">${String(index + 1).padStart(2, '0')}</div>
-                    </div>
-                    <div class="track-progress" id="progress-${index}"></div>
-                </div>
-            `).join('');
-        }
+function showGlobalPlayer() {
+  document.getElementById('globalPlayer').classList.add('visible');
+}
 
-        renderPlaylist();
+function updateUI() {
+  if (currentIndex === -1) return;
+  const song = songs[currentIndex];
+  document.getElementById('gpTitle').textContent = song.title;
+  document.getElementById('songTitle').textContent = song.title;
+  document.getElementById('songNumber').textContent = String(currentIndex + 1).padStart(2, '0');
+  document.getElementById('songImage').src = song.image;
+  document.getElementById('songLyrics').textContent = song.lyrics;
+}
 
-        // ===== УПРАВЛЕНИЕ ВОСПРОИЗВЕДЕНИЕМ =====
-               function playTrack(index) {
-            if (index === currentIndex && isPlaying) {
-                pause();
-                return;
-            }
-            if (index === currentIndex && !isPlaying) {
-                play();
-                return;
-            }
+function formatTime(sec) {
+  if (isNaN(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
 
-            currentIndex = index;
-            const song = songs[index];
+function unlockAudio() {
+  if (audioUnlocked) return;
+  const p = audio.play();
+  if (p && typeof p.then === 'function') {
+    p.then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+      audioUnlocked = true;
+      isPlaying = false;
+      updatePlayButtons();
+    }).catch(() => {});
+  }
+}
 
-            // Используем предзагруженный Blob URL, если он есть
-            if (audioCache[song.id]) {
-                audio.src = audioCache[song.id];
-            } else {
-                // fallback на случай, если предзагрузка ещё не завершена
-                audio.src = song.file;
-                console.warn('Аудио ещё не загружено, используем прямой URL');
-            }
-
-            updateUI();
-            showGlobalPlayer();
-
-            // Пробуем воспроизвести — теперь файл уже в памяти
-            const promise = audio.play();
-            if (promise !== undefined) {
-                promise
-                    .then(() => {
-                        isPlaying = true;
-                        updatePlayButtons();
-                    })
-                    .catch(e => {
-                        isPlaying = false;
-                        updatePlayButtons();
-                        console.warn('Play failed:', e);
-                        // Если не удалось, пробуем перезагрузить через прямой URL (страховка)
-                        if (!audioCache[song.id]) {
-                            audio.src = song.file;
-                            audio.load();
-                            setTimeout(() => audio.play().catch(console.warn), 100);
-                        }
-                    });
-            }
-
-            audio.onerror = () => {
-                console.warn('Ошибка аудио:', song.file);
-            };
-        }
-
-        function play() {
-            const promise = audio.play();
-            if (promise !== undefined) {
-                promise.then(() => {
-                    isPlaying = true;
-                    updatePlayButtons();
-                }).catch(e => {
-                    console.warn('Браузер заблокировал воспроизведение:', e);
-                    isPlaying = false;
-                    updatePlayButtons();
-                });
-            }
-        }
-
-        function pause() {
-            audio.pause();
-            isPlaying = false;
-            updatePlayButtons();
-        }
-
-        function togglePlay() {
-            if (currentIndex === -1) {
-                playTrack(0);
-                return;
-            }
-            if (isPlaying) pause();
-            else play();
-        }
-
-        function nextSong() {
-            let next = currentIndex + 1;
-            if (next >= songs.length) next = 0;
-            playTrack(next);
-        }
-
-        function prevSong() {
-            let prev = currentIndex - 1;
-            if (prev < 0) prev = songs.length - 1;
-            playTrack(prev);
-        }
-
-        // ===== ОБНОВЛЕНИЕ UI =====
-        function updatePlayButtons() {
-            const playIcon = document.getElementById('songPlayIcon');
-            const pauseIcon = document.getElementById('songPauseIcon');
-            const gpPlayIcon = document.getElementById('gpPlayIcon');
-            const gpPauseIcon = document.getElementById('gpPauseIcon');
-
-            if (isPlaying) {
-                if (playIcon) playIcon.style.display = 'none';
-                if (pauseIcon) pauseIcon.style.display = 'block';
-                if (gpPlayIcon) gpPlayIcon.style.display = 'none';
-                if (gpPauseIcon) gpPauseIcon.style.display = 'block';
-            } else {
-                if (playIcon) playIcon.style.display = 'block';
-                if (pauseIcon) pauseIcon.style.display = 'none';
-                if (gpPlayIcon) gpPlayIcon.style.display = 'block';
-                if (gpPauseIcon) gpPauseIcon.style.display = 'none';
-            }
-
-            renderPlaylist();
-        }
-
-        function updateUI() {
-            if (currentIndex === -1) return;
-            const song = songs[currentIndex];
-            document.getElementById('gpTitle').textContent = song.title;
-            document.getElementById('songTitle').textContent = song.title;
-            document.getElementById('songNumber').textContent = String(currentIndex + 1).padStart(2, '0');
-            document.getElementById('songImage').src = song.image;
-            document.getElementById('songLyrics').textContent = song.lyrics;
-        }
-
-        function showGlobalPlayer() {
-            document.getElementById('globalPlayer').classList.add('visible');
-        }
-
-        // ===== ПРОГРЕСС =====
-        function formatTime(sec) {
-            if (isNaN(sec)) return '0:00';
-            const m = Math.floor(sec / 60);
-            const s = Math.floor(sec % 60);
-            return `${m}:${s.toString().padStart(2, '0')}`;
-        }
-
-        audio.ontimeupdate = () => {
-            if (!audio.duration) return;
-            const pct = (audio.currentTime / audio.duration) * 100;
-            document.getElementById('gpProgressFill').style.width = pct + '%';
-            document.getElementById('songProgressFill').style.width = pct + '%';
-
-            const timeStr = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-            document.getElementById('gpTime').textContent = timeStr;
-            document.getElementById('songTime').textContent = timeStr;
-
-            if (currentIndex !== -1) {
-                const trackProgress = document.getElementById(`progress-${currentIndex}`);
-                if (trackProgress) trackProgress.style.width = pct + '%';
-            }
-        };
-
-        audio.onended = () => {
-            nextSong();
-        };
-
-        function seek(event, element) {
-            if (!audio.duration) return;
-            const rect = element.getBoundingClientRect();
-            const pct = (event.clientX - rect.left) / rect.width;
-            audio.currentTime = pct * audio.duration;
-        }
-
-        // ===== СТРАНИЦА ПЕСНИ =====
-        function openSong(index) {
-            currentIndex = index;
-            updateUI();
-            document.getElementById('songPage').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeSong() {
-            document.getElementById('songPage').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        // ===== HEADER SCROLL =====
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('header');
-            if (window.scrollY > 50) header.classList.add('scrolled');
-            else header.classList.remove('scrolled');
+function ensureAudioUnlocked() {
+  if (audioUnlocked) return Promise.resolve();
+  return new Promise(resolve => {
+    const done = () => {
+      if (audioUnlocked) resolve();
+    };
+    const tryUnlock = () => {
+      const p = audio.play();
+      if (p && typeof p.then === 'function') {
+        p.then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          audioUnlocked = true;
+          isPlaying = false;
+          updatePlayButtons();
+          resolve();
+        }).catch(() => {
+          resolve();
         });
+      } else {
+        resolve();
+      }
+    };
+    tryUnlock();
+    setTimeout(done, 0);
+  });
+}
 
-        // ===== КЛАВИШИ =====
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
-                e.preventDefault();
-                togglePlay();
-            }
-            if (e.code === 'ArrowRight') nextSong();
-            if (e.code === 'ArrowLeft') prevSong();
-            if (e.code === 'Escape') closeSong();
-        });
-    </script>
+async function play() {
+  try {
+    await ensureAudioUnlocked();
+    const promise = audio.play();
+    if (promise && typeof promise.then === 'function') {
+      await promise;
+    }
+    isPlaying = true;
+    updatePlayButtons();
+  } catch (e) {
+    console.warn('Playback blocked:', e);
+    isPlaying = false;
+    updatePlayButtons();
+  }
+}
+
+function pause() {
+  audio.pause();
+  isPlaying = false;
+  updatePlayButtons();
+}
+
+async function playTrack(index) {
+  if (index === currentIndex && isPlaying) {
+    pause();
+    return;
+  }
+
+  currentIndex = index;
+  audio.src = songs[index].file;
+  audio.load();
+  updateUI();
+  showGlobalPlayer();
+  updatePlayButtons();
+
+  await play();
+}
+
+function togglePlay() {
+  if (currentIndex === -1) {
+    playTrack(0);
+    return;
+  }
+  if (isPlaying) pause();
+  else play();
+}
+
+function nextSong() {
+  let next = currentIndex + 1;
+  if (next >= songs.length) next = 0;
+  playTrack(next);
+}
+
+function prevSong() {
+  let prev = currentIndex - 1;
+  if (prev < 0) prev = songs.length - 1;
+  playTrack(prev);
+}
+
+function seek(event, element) {
+  if (!audio.duration) return;
+  const rect = element.getBoundingClientRect();
+  const pct = (event.clientX - rect.left) / rect.width;
+  audio.currentTime = Math.max(0, Math.min(1, pct)) * audio.duration;
+}
+
+function openSong(index) {
+  currentIndex = index;
+  updateUI();
+  document.getElementById('songPage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSong() {
+  document.getElementById('songPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+audio.ontimeupdate = () => {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  const gpFill = document.getElementById('gpProgressFill');
+  const songFill = document.getElementById('songProgressFill');
+  if (gpFill) gpFill.style.width = `${pct}%`;
+  if (songFill) songFill.style.width = `${pct}%`;
+
+  const timeStr = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+  const gpTime = document.getElementById('gpTime');
+  const songTime = document.getElementById('songTime');
+  if (gpTime) gpTime.textContent = timeStr;
+  if (songTime) songTime.textContent = timeStr;
+
+  if (currentIndex !== -1) {
+    const trackProgress = document.getElementById(`progress-${currentIndex}`);
+    if (trackProgress) trackProgress.style.width = `${pct}%`;
+  }
+};
+
+audio.onended = () => nextSong();
+
+window.addEventListener('scroll', () => {
+  const header = document.getElementById('header');
+  if (!header) return;
+  if (window.scrollY > 50) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
+});
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    togglePlay();
+  }
+  if (e.code === 'ArrowRight') nextSong();
+  if (e.code === 'ArrowLeft') prevSong();
+  if (e.code === 'Escape') closeSong();
+});
+
+document.addEventListener('pointerdown', unlockAudio, { once: true });
+document.addEventListener('touchend', unlockAudio, { once: true });
+document.addEventListener('click', unlockAudio, { once: true });
+
+renderPlaylist();
+updatePlayButtons();
+</script>
 </body>
 </html>
