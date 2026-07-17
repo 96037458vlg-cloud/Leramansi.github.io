@@ -1657,28 +1657,53 @@
 
         // ===== УПРАВЛЕНИЕ ВОСПРОИЗВЕДЕНИЕМ =====
         function playTrack(index) {
-            if (index === currentIndex && isPlaying) {
-                pause();
-                return;
-            }
-            if (index === currentIndex && !isPlaying) {
-                play();
-                return;
-            }
+    if (index === currentIndex && isPlaying) {
+        pause();
+        return;
+    }
+    if (index === currentIndex && !isPlaying) {
+        play();
+        return;
+    }
 
-            currentIndex = index;
-            audio.src = songs[index].file;
-            audio.load();
-            updateUI();
-            showGlobalPlayer();
-            // ВАЖНО для мобильных: play() вызываем сразу, в контексте клика.
-            // Браузер сам дождётся буферизации и начнёт воспроизведение.
-            play();
+    currentIndex = index;
+    const song = songs[index];
+    audio.src = song.file;
+    audio.load();
 
-            audio.onerror = () => {
-                console.warn('Не удалось загрузить аудио:', songs[index].file);
-            };
-        }
+    updateUI();
+    showGlobalPlayer();
+
+    // ---- ОБХОД ПОЛИТИКИ АВТОЗАПУСКА ----
+    // Временно приглушаем звук, чтобы разрешить play() на мобильных
+    const wasMuted = audio.muted;
+    audio.muted = true;
+
+    const promise = audio.play();
+    if (promise !== undefined) {
+        promise
+            .then(() => {
+                // Воспроизведение началось — включаем звук
+                audio.muted = false;
+                isPlaying = true;
+                updatePlayButtons();
+            })
+            .catch(e => {
+                // Если не удалось — возвращаем muted в исходное состояние
+                audio.muted = wasMuted;
+                isPlaying = false;
+                updatePlayButtons();
+                console.warn('Play failed (первая попытка):', e);
+                // Можно попробовать ещё раз через событие canplaythrough, но это уже не будет прямым жестом
+                // Лучше дать пользователю нажать повторно
+            });
+    }
+
+    audio.onerror = () => {
+        console.warn('Не удалось загрузить аудио:', song.file);
+        // Можно показать сообщение пользователю
+    };
+}
 
         function play() {
             const promise = audio.play();
