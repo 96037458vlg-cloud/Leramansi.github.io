@@ -1623,7 +1623,27 @@
 Найдёшь лишь в себе.`
     }
 ];
+// ===== ПРЕДЗАГРУЗКА АУДИО В ПАМЯТЬ (для мобильных) =====
+const audioCache = {};
 
+async function preloadAllAudio() {
+    // Загружаем все треки параллельно
+    const promises = songs.map(async (song) => {
+        try {
+            const response = await fetch(song.file);
+            if (!response.ok) throw new Error('Network error');
+            const blob = await response.blob();
+            audioCache[song.id] = URL.createObjectURL(blob);
+        } catch (e) {
+            console.warn('Не удалось предзагрузить:', song.file, e);
+        }
+    });
+    await Promise.all(promises);
+    console.log('✅ Все аудиофайлы предзагружены!');
+}
+
+// Запускаем предзагрузку после загрузки страницы
+window.addEventListener('load', preloadAllAudio);
         // ===== СОСТОЯНИЕ =====
         let currentIndex = -1;
         let isPlaying = false;
@@ -1656,54 +1676,56 @@
         renderPlaylist();
 
         // ===== УПРАВЛЕНИЕ ВОСПРОИЗВЕДЕНИЕМ =====
-        function playTrack(index) {
-    if (index === currentIndex && isPlaying) {
-        pause();
-        return;
-    }
-    if (index === currentIndex && !isPlaying) {
-        play();
-        return;
-    }
+               function playTrack(index) {
+            if (index === currentIndex && isPlaying) {
+                pause();
+                return;
+            }
+            if (index === currentIndex && !isPlaying) {
+                play();
+                return;
+            }
 
-    currentIndex = index;
-    const song = songs[index];
-    audio.src = song.file;
-    audio.load();
+            currentIndex = index;
+            const song = songs[index];
 
-    updateUI();
-    showGlobalPlayer();
+            // Используем предзагруженный Blob URL, если он есть
+            if (audioCache[song.id]) {
+                audio.src = audioCache[song.id];
+            } else {
+                // fallback на случай, если предзагрузка ещё не завершена
+                audio.src = song.file;
+                console.warn('Аудио ещё не загружено, используем прямой URL');
+            }
 
-    // ---- ОБХОД ПОЛИТИКИ АВТОЗАПУСКА ----
-    // Временно приглушаем звук, чтобы разрешить play() на мобильных
-    const wasMuted = audio.muted;
-    audio.muted = true;
+            updateUI();
+            showGlobalPlayer();
 
-    const promise = audio.play();
-    if (promise !== undefined) {
-        promise
-            .then(() => {
-                // Воспроизведение началось — включаем звук
-                audio.muted = false;
-                isPlaying = true;
-                updatePlayButtons();
-            })
-            .catch(e => {
-                // Если не удалось — возвращаем muted в исходное состояние
-                audio.muted = wasMuted;
-                isPlaying = false;
-                updatePlayButtons();
-                console.warn('Play failed (первая попытка):', e);
-                // Можно попробовать ещё раз через событие canplaythrough, но это уже не будет прямым жестом
-                // Лучше дать пользователю нажать повторно
-            });
-    }
+            // Пробуем воспроизвести — теперь файл уже в памяти
+            const promise = audio.play();
+            if (promise !== undefined) {
+                promise
+                    .then(() => {
+                        isPlaying = true;
+                        updatePlayButtons();
+                    })
+                    .catch(e => {
+                        isPlaying = false;
+                        updatePlayButtons();
+                        console.warn('Play failed:', e);
+                        // Если не удалось, пробуем перезагрузить через прямой URL (страховка)
+                        if (!audioCache[song.id]) {
+                            audio.src = song.file;
+                            audio.load();
+                            setTimeout(() => audio.play().catch(console.warn), 100);
+                        }
+                    });
+            }
 
-    audio.onerror = () => {
-        console.warn('Не удалось загрузить аудио:', song.file);
-        // Можно показать сообщение пользователю
-    };
-}
+            audio.onerror = () => {
+                console.warn('Ошибка аудио:', song.file);
+            };
+        }
 
         function play() {
             const promise = audio.play();
